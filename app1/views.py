@@ -59,11 +59,11 @@ class MatrixOperationView(APIView):
             return Response({'result':rrf})
         
         elif operation == 'determinant':
-            determinant = int(np.linalg.det(matrix))
+            determinant = round(np.linalg.det(matrix))
             return Response({'result':determinant})
         
         elif operation == 'rank':
-            rank = int(np.linalg.matrix_rank(matrix))
+            rank = round(np.linalg.matrix_rank(matrix))
             return Response({'result':rank})
         
         elif operation == 'echelon_form':
