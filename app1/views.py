@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from .serializer import VectorOperationSerializer, MatrixOperationSerializer
 from rest_framework.response import Response
 import numpy as np
+import sympy as sp
 
 #Api for Vector operation
 class VectorOperationView(APIView):
@@ -22,14 +23,14 @@ class VectorOperationView(APIView):
         scalar = serializer.validated_data['scalar']
         operator = serializer.validated_data['operator']
 
-        if operator == 'Add':
+        if operator == 'add':
             result = [vectorA[0] + vectorB[0], vectorA[1] + vectorB[1]]
 
         elif operator == 'subtract':
             result = [vectorA[0] - vectorB[0], vectorA[1] - vectorB[1]]
 
         elif operator == 'multiply':
-            result = [scalar*vectorA[0], scalar*vectorB[1]]
+            result = [scalar*vectorA[0], scalar*vectorA[1]]
 
         return Response({'result':result})
 
@@ -53,11 +54,10 @@ class MatrixOperationView(APIView):
         operation = serializer.validated_data['operation']
         
         if operation == 'row_reduced_form':
-            matrix = matrix
-            vector = matrix[0]
-            rrf = np.linalg.solve(matrix, vector)
+            q, r = np.linalg.qr(matrix)
+            rrf = np.round(np.array([row / row[row != 0][0] for row in r]))
             return Response({'result':rrf})
-        
+            
         elif operation == 'determinant':
             determinant = round(np.linalg.det(matrix))
             return Response({'result':determinant})
@@ -66,11 +66,12 @@ class MatrixOperationView(APIView):
             rank = round(np.linalg.matrix_rank(matrix))
             return Response({'result':rank})
         
-        elif operation == 'echelon_form':
-            echelon =[np.linalg.inv(matrix)]
-            return Response({'result':echelon})
+        # elif operation == 'echelon_form':
+        #     echelon =[np.linalg.inv(matrix)]
+        #     return Response({'result':echelon})
+        
         else:
-            return Response({'result':'Invalid Operation Choice'})
+            return Response({'result':"Invalid Operation Choice"})
 
 
 #Linear Equation solver
@@ -92,6 +93,6 @@ class LinearView(APIView):
         eqn_LHS = np.array(serializer.validated_data['eqn_LHS'])
         eqn_RHS = np.array(serializer.validated_data['eqn_RHS'])
 
-        result = np.linalg.solve(eqn_LHS,eqn_RHS)
+        result = np.round(np.linalg.solve(eqn_LHS,eqn_RHS))
         
         return Response({'result':result})
