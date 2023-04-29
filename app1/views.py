@@ -25,14 +25,20 @@ class VectorOperationView(APIView):
 
         if operator == 'add':
             result = [vectorA[0] + vectorB[0], vectorA[1] + vectorB[1]]
-
+            return Response({'result': result})
+        
         elif operator == 'subtract':
             result = [vectorA[0] - vectorB[0], vectorA[1] - vectorB[1]]
-
+            return Response({'result': result})
+        
         elif operator == 'multiply':
             result = [scalar*vectorA[0], scalar*vectorA[1]]
-
-        return Response({'result':result})
+            return Response({'result': result})
+        
+        else:
+            return Response({'result': "invalid operation"})
+        
+        
 
 
 #API for Matrix operation #problem No: ###
