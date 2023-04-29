@@ -56,6 +56,7 @@ class MatrixOperationView(APIView):
         if operation == 'row_reduced_form':
             q, r = np.linalg.qr(matrix)
             rrf = np.round(np.array([row / row[row != 0][0] for row in r]))
+            rrf = rrf.astype(int)
             return Response({'result':rrf})
             
         elif operation == 'determinant':
@@ -94,5 +95,6 @@ class LinearView(APIView):
         eqn_RHS = np.array(serializer.validated_data['eqn_RHS'])
 
         result = np.round(np.linalg.solve(eqn_LHS,eqn_RHS))
+        result = result.astype(int)
         
         return Response({'result':result})
