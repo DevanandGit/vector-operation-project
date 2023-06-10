@@ -11,6 +11,8 @@ import pandas as pd
 import scipy as sp
 import numpy as np
 from PIL import Image
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import io
 import base64
@@ -134,6 +136,14 @@ class EigenValueSpaceView(APIView):
     def get_serializer(self, *args, **kwargs):
         return EigenValueSpace(*args, **kwargs)
 
+    def find_eigen(self,matrix):
+        eigenvalues, eigenvectors = np.linalg.eig(matrix)
+        response = {
+            'eigenvalues':eigenvalues,
+            'eigenvectors':eigenvectors,
+        }
+        return Response(response)
+    
     def visualize_eigen_space(self, matrix):
 
         eigenvalues, eigenvectors = np.linalg.eig(matrix)
@@ -183,10 +193,11 @@ class EigenValueSpaceView(APIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        matrix = serializer.validated_data['matrix']
-        
-        return self.visualize_eigen_space(matrix) #ivde aan preshnam.
+        matrix = np.array(serializer.validated_data['matrix'])
+        if matrix.shape == (2,2):
+            return self.visualize_eigen_space(matrix)
+        else:
+            return self.find_eigen(matrix)
 
 
 #problem -6 view
@@ -249,9 +260,10 @@ class LinearRegressionView(APIView):
     def get_serializer(self, *args, **kwargs):
         return LinearRegression(*args, **kwargs)
     
+
     def linear_regression(self, x, y):
         # Data
-        x1 = np.array(x) #needed for scatter plot
+        x1 = np.array(x)  # Needed for scatter plot
         X = np.array(x)
         Y = np.array(y)
 
@@ -264,22 +276,29 @@ class LinearRegressionView(APIView):
         # Extract the slope and intercept
         intercept = beta[0]
         slope = beta[1]
-        
+
         def y_generate(x):
             return slope * x + intercept
-        
+
         # Plotting
         fig, ax = plt.subplots()
         ax.scatter(x1, Y)
         ax.plot(np.linspace(0, 50, 1000), list(map(y_generate, np.linspace(0, 50, 1000))))
-        
-        #converting image into binary data
+        plt.xlabel('X-axis', color='r', size=12)
+        plt.ylabel('Y-axis', color='r', size=12)
+
+        # Add equation text to the plot
+        equation_text = f'y = {slope:.2f}x + {intercept:.2f}'
+        ax.text(0.69, 0.1, equation_text, transform=ax.transAxes, fontsize=12)
+
+        # Converting the plot to binary data
         image_stream = io.BytesIO()
         plt.savefig(image_stream, format='jpeg')
         plt.close(fig)
         image_stream.seek(0)
-        
+
         return HttpResponse(image_stream, content_type='image/jpeg')
+
     
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
