@@ -139,8 +139,8 @@ class EigenValueSpaceView(APIView):
     def find_eigen(self,matrix):
         eigenvalues, eigenvectors = np.linalg.eig(matrix)
         response = {
-            'eigenvalues':eigenvalues,
-            'eigenvectors':eigenvectors,
+            'eigenvalues':(np.round(eigenvalues)).astype(int),
+            'eigenvectors':(np.round(eigenvectors)).astype(int),
         }
         return Response(response)
     
@@ -184,8 +184,8 @@ class EigenValueSpaceView(APIView):
         eigenvectors = eigenvectors.tolist()
         image_data = base64.b64encode(image_stream.getvalue()).decode('utf-8')
         response = {
-            'eigenvalues':eigenvalues,
-            'eigenvectors':eigenvectors,
+            'eigenvalues':np.round(eigenvalues),
+            'eigenvectors':np.round(eigenvectors),
             'image':image_data
         }
         return JsonResponse(response)
@@ -237,12 +237,12 @@ class MatrixDecompositionView(APIView):
         Q,R = self.qr_decomposition(matrix)
 
         response = {
-            'diag_matrix': diag_matrix,
-            'P': P,
-            'L': L,
-            'U': U,
-            'Q': Q,
-            'R': R,
+            'diag_matrix': (np.round(diag_matrix)).astype(int),
+            'P': (np.round(P)).astype(int),
+            'L': (np.round(L)).astype(int),
+            'U': (np.round(U)).astype(int),
+            'Q': (np.round(Q)).astype(int),
+            'R': (np.round(R)).astype(int),
         }
         return Response(response)
 
